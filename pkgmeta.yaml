@@ -1,0 +1,11 @@
+package-as: JunkIt
+enable-nolib-creation: no
+
+externals:
+  libs/GeminiLocale-1.0:
+    url: https://github.com/wildstarnasa/GeminiLocale.git
+  libs/LibApolloFixes-1.0:
+    url: https://github.com/wildstarnasa/LibApolloFixes.git
+
+ignore:
+  - README.md

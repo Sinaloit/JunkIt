@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Addon Name="JunkIt" Version="@project-version@" Author="Sinaloit" APIVersion="9" Description="Auto-Junking/Repairing Addon">
+    <!-- Libraries -->
+    <Script Name="libs\GeminiLocale-1.0\GeminiLocale.lua"/>
+    <Script Name="libs\LibApolloFixes-1.0\LibApolloFixes-1.0.lua"/>
+    <!-- Localization -->
+    <Script Name="locale\enUS.lua"/>
+    <Script Name="locale\deDE.lua"/>
+    <Script Name="locale\frFR.lua"/>
+    <Script Name="locale\koKR.lua"/>
+    <!-- Addon -->
+    <Script Name="JunkIt.lua"/>
+    <Form Name="JunkIt.xml"/>
+</Addon>
