@@ -97,7 +97,7 @@ function JunkIt:new(o)
     o.config.repairGuild  = false
 
     o.config.minSellQuality = Item.CodeEnumItemQuality.Average
-    
+
     return o
 end
 
@@ -118,7 +118,7 @@ end
 
 function JunkIt:OnDocLoaded()
     -- Store reference to the Vendor addon
-    
+
     self.vendorAddon = Apollo.GetAddon(strParentAddon)
 
     -- Event thrown by opening the a Vendor window
@@ -128,7 +128,7 @@ function JunkIt:OnDocLoaded()
 
     -- Boolean to indicate options need configured
     self.bConfigOptions = true
-    
+
     -- Init ReverseLookup
     for k,v in pairs(Item.CodeEnumItemQuality) do
         ktReverseQualityLookup[v] = k
@@ -182,7 +182,7 @@ function JunkIt:SetupJunkIt()
     end
     -- Show the Options button all the time
     self.wndOpt:Show(true)
-    
+
     -- Hide the Options Frame by default
     self.wndJunkOpts:Show(false, true)
 
@@ -212,10 +212,6 @@ function JunkIt:OnVendorClosed()
     self.wndJunkOpts:Show(false)
     -- If we are showing a submenu get rid of it
     if self.wndSubMenu then
-        local wndPopout = self.wndSubMenu:GetData():GetParent():FindChild("QualityPopoutBtn")
-        if wndPopout ~= nil then
-            wndPopout:SetCheck(false)
-        end
         self.wndSubMenu:Destroy()
     end
 end
@@ -277,7 +273,7 @@ function JunkIt:OnDelayedAlert()
     end
 end
 
------------------------------------------------------------------------------------------------ 
+-----------------------------------------------------------------------------------------------
 -- Selling Functions
 -----------------------------------------------------------------------------------------------
 function JunkIt:SellItems(bAuto)
@@ -320,12 +316,12 @@ function JunkIt:DebugSell(item)
 
     -- Pull the itemFamily to reduce # of function calls
     local itemFamily = item:GetItemFamily()
-    
+
     --  Are we selling this type of item?
-    if ((itemFamily == ItemFamily.Armor and self.config.sellArmor) or 
-        (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or 
+    if ((itemFamily == ItemFamily.Armor and self.config.sellArmor) or
+        (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or
         (itemFamily == ItemFamily.Ornamental and self.config.sellShields) or
-        (itemFamily == ItemFamily.Housing and self.config.sellHousing) or       
+        (itemFamily == ItemFamily.Housing and self.config.sellHousing) or
         (itemFamily == ItemFamily.Costume and self.config.sellCostumes)) then
         -- Is it under our threshold?
         if item:GetItemQuality() == Item.CodeEnumItemQuality.Inferior or self.config.minSellQuality > item:GetItemQuality() then
@@ -337,7 +333,7 @@ function JunkIt:DebugSell(item)
     -- Default is no, it is not sellable
     Print(item:GetName() .. " will not be auto-sold [Does not match filters (Item type or Quality)]")
     return false
-end 
+end
 
 function JunkIt:IsSellable(item)
     if self.config.Debug then return self:DebugSell(item) end
@@ -355,14 +351,14 @@ function JunkIt:IsSellable(item)
 
     -- Pull the itemFamily to reduce # of function calls
     local itemFamily = item:GetItemFamily()
-    
+
     --  Are we selling this type of item?
-    if ((itemFamily == ItemFamily.Armor and self.config.sellArmor) or 
-        (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or 
+    if ((itemFamily == ItemFamily.Armor and self.config.sellArmor) or
+        (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or
         (itemFamily == ItemFamily.Ornamental and self.config.sellShields) or
-        (itemFamily == ItemFamily.Housing and self.config.sellHousing) or       
+        (itemFamily == ItemFamily.Housing and self.config.sellHousing) or
         (itemFamily == ItemFamily.Costume and self.config.sellCostumes)) then
-        
+
         -- Is it under our threshold?
         if item:GetItemQuality() == Item.CodeEnumItemQuality.Inferior or self.config.minSellQuality > item:GetItemQuality() then return true end
     end
@@ -417,7 +413,7 @@ function JunkIt:CanRepair(unitArg)
     return nCount
 end
 
------------------------------------------------------------------------------------------------ 
+-----------------------------------------------------------------------------------------------
 -- Guild Functions
 -----------------------------------------------------------------------------------------------
 function JunkIt:GuildRepair(unitArg)
@@ -446,7 +442,7 @@ function JunkIt:GuildRepair(unitArg)
     local repairableItems = unitArg:GetRepairableItems()
     local nRepairAllCost = 0
     for key, tCurrItem in pairs(repairableItems) do
-        if IsValidRepairable(tCurrItem) then 
+        if IsValidRepairable(tCurrItem) then
             local tCurrPrice = mathmax(tCurrItem.tPriceInfo.nAmount1, tCurrItem.tPriceInfo.nAmount2) * tCurrItem.nStackSize
             nRepairAllCost = nRepairAllCost + tCurrPrice
         end
@@ -524,7 +520,6 @@ function JunkIt:OnQualityPopoutToggle( wndHandler, wndControl, eMouseButton )
         return
     end
     if self.wndSubMenu then
-        self.wndSubMenu:GetData():GetParent():FindChild("QualityPopoutBtn"):SetCheck(false)
         self.wndSubMenu:Destroy()
     end
     self.wndSubMenu = Apollo.LoadForm(self.Xml, "QualityMenu", wndControl, self)
@@ -534,10 +529,6 @@ end
 
 function JunkIt:OnQualityDropdownToggle( wndHandler, wndControl, eMouseButton )
     if self.wndSubMenu then
-        local wndPopout = self.wndSubMenu:GetData():GetParent():FindChild("QualityPopoutBtn")
-        if wndPopout ~= nil then
-            wndPopout:SetCheck(false)
-        end
         self.wndSubMenu:Destroy()
         if not wndControl:IsChecked() then
             return
@@ -556,12 +547,7 @@ end
 function JunkIt:OnQualityBtnClicked( wndHandler, wndControl, eMouseButton )
     self.wndSubMenu:GetData():SetText(wndControl:FindChild("QualityBtnTxt"):GetText())
     self.wndSubMenu:GetData():SetNormalTextColor("ItemQuality_"..wndControl:GetName())
-    local wndPopout = self.wndSubMenu:GetData():GetParent():FindChild("QualityPopoutBtn")
-    if wndPopout ~= nil then
-        wndPopout:SetCheck(false)
-    else
-        self.wndSubMenu:GetData():SetCheck(false)
-    end
+    self.wndSubMenu:GetData():SetCheck(false)
 
     local strWndName = wndControl:GetName()
     for k,v in pairs(ktReverseQualityLookup) do

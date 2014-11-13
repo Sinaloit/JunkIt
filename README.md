@@ -23,11 +23,10 @@ Filters
 
 Default Options are:
 
-
-Sell Armor (To Keep, uncheck Armor)
-Sell Weapons (To keep, uncheck Weapons)
-Sell Shields (To keep, uncheck Shields)
-Sell Salvageable items (To keep, check Keep Salvagables)
-No auto sell (To auto-sell check Sell in options)
-No auto repair (To auto-repair check Repair in options)
-Sell items less than average quality (Change with dropdown)
+* Sell Armor (To Keep, uncheck Armor)
+* Sell Weapons (To keep, uncheck Weapons)
+* Sell Shields (To keep, uncheck Shields)
+* Sell Salvageable items (To keep, check Keep Salvagables)
+* No auto sell (To auto-sell check Sell in options)
+* No auto repair (To auto-repair check Repair in options)
+* Sell items less than average quality (Change with dropdown)
