@@ -48,14 +48,7 @@ local tAlertTimer
 local ktVendorAddons = {
     ["Vendor"] = {
         wndVendor = "wndVendor",
-        strAnchor = "BGFrame",
-    },
-    ["LilVendor"] = {
-        wndVendor       = "wndLilVendor",
-        tButtonOffsets  = {-7,-7,28,28},
-        tOptionsOffsets = {-51,0,-25,24},
-        nUpShift        = 40,
-        nLeftShift      = 5,
+        strAnchor = "OptionsContainer",
     },
 }
 
@@ -123,6 +116,7 @@ function JunkIt:OnDocLoaded()
 
     -- Event thrown by opening the a Vendor window
     Apollo.RegisterEventHandler("InvokeVendorWindow",   "OnInvokeVendorWindow", self)
+    Apollo.RegisterEventHandler("WindowManagementAdd",  "OnWindowManagementAdd", self)
     -- Event thrown by closing the a Vendor window
     Apollo.RegisterEventHandler("CloseVendorWindow",    "OnVendorClosed", self)
 
@@ -151,15 +145,18 @@ end
 ---------------------------------------------------------------------------------------------------
 -- JunkIt EventHandlers
 ---------------------------------------------------------------------------------------------------
-
-
-local function FindAnchor(oAddon)
-    local wndParent = oAddon[ktVendorAddons[strParentAddon].wndVendor]
+local function FindAnchor(oAddon, strParentAddon)
+    local aRef = strParentAddon == "Vendor" and oAddon.tWndRefs or oAddon
+    local wndParent = aRef[ktVendorAddons[strParentAddon].wndVendor]
 
     if ktVendorAddons[strParentAddon].strAnchor then
         wndParent = wndParent:FindChild(ktVendorAddons[strParentAddon].strAnchor)
+        if strParentAddon == "Vendor" then
+            wndParent:SetAnchorOffsets(-1,27,215,466)
+            local wndDefOpts = wndParent:FindChild("OptionsContainerFrame")
+            wndDefOpts:Show(false, true)
+        end
     end
-
     return wndParent
 end
 
@@ -169,22 +166,9 @@ end
 function JunkIt:SetupJunkIt()
     -- Load forms, parent to vendor addon
     local wndParent = FindAnchor(self.vendorAddon, strParentAddon)
-    self.wndJunkOpts = Apollo.LoadForm(self.Xml, "OptionsContainer", wndParent, self)
+    self.wndJunkOpts = Apollo.LoadForm(self.Xml, "JunkItOptionsContainerFrame", wndParent, self)
+    self.wndJunkButton = Apollo.LoadForm(self.Xml, "JunkButtonOverlay", self.vendorAddon.tWndRefs.wndVendor or self.vendorAddon.wndLilVendor, self)
     GeminiLocale:TranslateWindow(L, self.wndJunkOpts)
-    self.wndOpt = Apollo.LoadForm(self.Xml, "VendorWindowOverlay", wndParent, self)
-    self.wndJunkButton = Apollo.LoadForm(self.Xml, "JunkButtonOverlay", self.vendorAddon.wndVendor or self.vendorAddon.wndLilVendor, self)
-    if strParentAddon ~= "Vendor" then
-        self.wndJunkButton:SetAnchorOffsets(unpack(ktVendorAddons[strParentAddon].tButtonOffsets))
-        self.wndOpt:SetAnchorOffsets(unpack(ktVendorAddons[strParentAddon].tOptionsOffsets))
-        local left,top,right,bottom = self.wndJunkOpts:GetAnchorOffsets()
-        local nUpShift, nLeftShift = ktVendorAddons[strParentAddon].nUpShift, ktVendorAddons[strParentAddon].nLeftShift
-        self.wndJunkOpts:SetAnchorOffsets(left - nLeftShift, top - nUpShift, right- nLeftShift, bottom - nUpShift)
-    end
-    -- Show the Options button all the time
-    self.wndOpt:Show(true)
-
-    -- Hide the Options Frame by default
-    self.wndJunkOpts:Show(false, true)
 
     -- Iterate through config options
     for k,v in pairs(self.config) do
@@ -201,28 +185,36 @@ function JunkIt:SetupJunkIt()
     -- Show/Hide Sell button based on autosell config
     self:SetButtonState()
     -- Set boolean to indicate options have been set
-    self.bConfigOptions = false
+    if self.bConfigOptions then
+        -- Turn off Base AutoSell
+        self.vendorAddon.bAutoSellToVendor = false
+        -- Indicate One-Time Config is done
+        self.bConfigOptions = false
+    end
 end
 
 -- Event Handler for Vendor Window closing
 function JunkIt:OnVendorClosed()
-    -- If the button is not set unchecked it appears checked next time window is opened
-    self.wndOpt:FindChild("OptionsBtn"):SetCheck(false)
     -- Hide Options window when vendor is closed, prevents options from being open next time vendor is opened
-    self.wndJunkOpts:Show(false)
+    --self.wndJunkOpts:Show(false)
     -- If we are showing a submenu get rid of it
     if self.wndSubMenu then
         self.wndSubMenu:Destroy()
     end
 end
 
+-- Event handler for WindowManagementAdd - Monitoring for Vendor SetupJunkIt
+function JunkIt:OnWindowManagementAdd(windowInfo)
+  self.WinInfo = windowInfo
+  if windowInfo.strName ~= Apollo.GetString("CRB_Vendor") then
+      return
+  end
+  -- Check and see if options pane needs to be synced, if so sync it
+  self:SetupJunkIt()
+end
+
 -- Event handler for Vendor window opening.
 function JunkIt:OnInvokeVendorWindow(unitArg)
-    -- Check and see if options pane needs to be synced, if so sync it
-    if self.bConfigOptions then
-        self:SetupJunkIt()
-    end
-
     local nItemsSold = nil
     if self.config.autoSell then
         nItemsSold = self:SellItems(true)
@@ -233,7 +225,7 @@ function JunkIt:OnInvokeVendorWindow(unitArg)
         nItemsRepaired = self:CanRepair(unitArg)
         if nItemsRepaired then
             if self.config.repairGuild then
-                self:GuildRepair(unitArg)
+                self.vendorAddon:OnGuildRepairBtn()
             else
                 self:RepairItems(unitArg)
             end
@@ -489,7 +481,7 @@ end
 
 function JunkIt:SetButtonState()
     local showButton
-    if self.config.autoSell then
+    if self.config.autoSell ~= nil then
         showButton = self.config.showButton
     else
         showButton = true
