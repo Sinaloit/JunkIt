@@ -77,6 +77,7 @@ function JunkIt:new(o)
     setmetatable(o, self)
     self.__index = self
 
+    o.bWindowInitialized  = false
     o.config              = {}
     o.config.sellArmor    = true
     o.config.sellWeapons  = true
@@ -205,48 +206,71 @@ end
 
 -- Event handler for WindowManagementAdd - Monitoring for Vendor SetupJunkIt
 function JunkIt:OnWindowManagementAdd(windowInfo)
-  self.WinInfo = windowInfo
-  if windowInfo.strName ~= Apollo.GetString("CRB_Vendor") then
-      return
+    self.WinInfo = windowInfo
+    if windowInfo.strName ~= Apollo.GetString("CRB_Vendor") then
+        return
+    end
+    -- Vendor Window appears to be destroyed so we have to reattach
+    -- every time it is created
+    self:SetupJunkIt()
+    -- Mark Window as intialized so we know we can process repairs
+    self.bWindowInitialized = true
+
+    -- If OnInvokeVendorWindow has already been processed then we can Sell/Repair
+    if self.vendorUnitArg ~= nil then
+        self:ProcessActions(self.vendorUnitArg)
+    end
+end
+
+-- Helper function to process actions once everything is setup
+function JunkIt:ProcessActions(unitArg)
+  local nItemsSold = nil
+  if self.config.autoSell then
+      nItemsSold = self:SellItems(true)
   end
-  -- Vendor Window appears to be destroyed so we have to reattach
-  -- every time it is created
-  self:SetupJunkIt()
+
+  local nItemsRepaired = nil
+  if self.config.autoRepair and IsRepairVendor(unitArg) then
+      nItemsRepaired = self:CanRepair(unitArg)
+      if nItemsRepaired then
+          if self.config.repairGuild then
+              self:GuildRepair(unitArg)
+          else
+              self:RepairItems(unitArg)
+          end
+      end
+  end
+
+  -- Didn't do anything interesting, exit out.
+  if (not nItemsSold or nItemsSold == 0) and (not nItemsRepaired  or nItemsRepaired == 0) then return end
+
+  local strAlertMsg = "JunkIt"
+
+  if nItemsSold then
+      strAlertMsg = strformat("%s: Sold %d Items", strAlertMsg, nItemsSold)
+  end
+
+  if nItemsRepaired then
+      strAlertMsg = strformat("%s: Repaired %d Items", strAlertMsg, nItemsRepaired)
+  end
+
+  self:SendAlert(strAlertMsg)
+
+  -- Nil out unitArg to prevent confusion later
+  self.vendorUnitArg = nil
+  -- Mark window as non initialized again
+  self.bWindowInitialized = false
 end
 
 -- Event handler for Vendor window opening.
 function JunkIt:OnInvokeVendorWindow(unitArg)
-    local nItemsSold = nil
-    if self.config.autoSell then
-        nItemsSold = self:SellItems(true)
+    -- If window is already initialized process actions
+    if self.bWindowInitialized then
+        self:ProcessActions(unitArg)
+    else
+        -- Otherwise store the vendor unit for later use
+        self.vendorUnitArg = unitArg
     end
-
-    local nItemsRepaired = nil
-    if self.config.autoRepair and IsRepairVendor(unitArg) then
-        nItemsRepaired = self:CanRepair(unitArg)
-        if nItemsRepaired then
-            if self.config.repairGuild then
-                self:GuildRepair(unitArg)
-            else
-                self:RepairItems(unitArg)
-            end
-        end
-    end
-
-    -- Didn't do anything interesting, exit out.
-    if (not nItemsSold or nItemsSold == 0) and (not nItemsRepaired  or nItemsRepaired == 0) then return end
-
-    local strAlertMsg = "JunkIt"
-
-    if nItemsSold then
-        strAlertMsg = strformat("%s: Sold %d Items", strAlertMsg, nItemsSold)
-    end
-
-    if nItemsRepaired then
-        strAlertMsg = strformat("%s: Repaired %d Items", strAlertMsg, nItemsRepaired)
-    end
-
-    self:SendAlert(strAlertMsg)
 end
 
 function JunkIt:SendAlert(strAlert)
