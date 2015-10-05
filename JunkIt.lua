@@ -226,7 +226,7 @@ function JunkIt:OnInvokeVendorWindow(unitArg)
         nItemsRepaired = self:CanRepair(unitArg)
         if nItemsRepaired then
             if self.config.repairGuild then
-                self.vendorAddon:OnGuildRepairBtn()
+                self:GuildRepair(unitArg)
             else
                 self:RepairItems(unitArg)
             end
