@@ -209,7 +209,8 @@ function JunkIt:OnWindowManagementAdd(windowInfo)
   if windowInfo.strName ~= Apollo.GetString("CRB_Vendor") then
       return
   end
-  -- Check and see if options pane needs to be synced, if so sync it
+  -- Vendor Window appears to be destroyed so we have to reattach
+  -- every time it is created
   self:SetupJunkIt()
 end
 
