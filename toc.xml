@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<Addon Name="JunkIt" Version="@project-version@" Author="Sinaloit" APIVersion="9" Description="Auto-Junking/Repairing Addon">
+<Addon Name="JunkIt" Version="@project-version@" Author="Sinaloit" APIVersion="11" Description="Auto-Junking/Repairing Addon">
     <!-- Libraries -->
     <Script Name="libs\GeminiLocale-1.0\GeminiLocale.lua"/>
     <Script Name="libs\LibApolloFixes-1.0\LibApolloFixes-1.0.lua"/>
