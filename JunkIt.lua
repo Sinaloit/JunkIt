@@ -467,8 +467,9 @@ function JunkIt:GuildRepair(unitArg)
     if nRepairAllCost <= nAvailableFunds then
         tMyGuild:RepairAllItemsVendor()
         local monRepairAllCost = GameLib.GetRepairAllCost()
-        self.vendorAddon[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetMoneySystem(Money.CodeEnumCurrencyType.Credits)
-        self.vendorAddon[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetAmount(monRepairAllCost)
+        local aRef = self.vendorAddon.tWndRefs and self.vendorAddon.tWndRefs or self.vendorAddon
+        aRef[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetMoneySystem(Money.CodeEnumCurrencyType.Credits)
+        aRef[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetAmount(monRepairAllCost)
     else
         self:RepairItems()
         return
