@@ -443,7 +443,7 @@ function JunkIt:GuildRepair(unitArg)
     end
 
     if not tMyGuild then
-        self:RepairItems()
+        self:RepairItems(unitArg)
         return
     end
 
@@ -471,7 +471,7 @@ function JunkIt:GuildRepair(unitArg)
         aRef[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetMoneySystem(Money.CodeEnumCurrencyType.Credits)
         aRef[ktVendorAddons[strParentAddon].wndVendor]:FindChild("AlertCost"):SetAmount(monRepairAllCost)
     else
-        self:RepairItems()
+        self:RepairItems(unitArg)
         return
     end
     Sound.Play(Sound.PlayUIVendorRepair)
