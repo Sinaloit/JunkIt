@@ -218,12 +218,14 @@ function JunkIt:OnWindowManagementAdd(windowInfo)
 
     -- If OnInvokeVendorWindow has already been processed then we can Sell/Repair
     if self.vendorUnitArg ~= nil then
-        self:ProcessActions(self.vendorUnitArg)
+        self:ProcessActions(self.vendorUnitArg, windowInfo.wnd)
     end
 end
 
 -- Helper function to process actions once everything is setup
-function JunkIt:ProcessActions(unitArg)
+function JunkIt:ProcessActions(unitArg, wndRef)
+  wndRef:SetData(unitArg)
+
   local nItemsSold = nil
   if self.config.autoSell then
       nItemsSold = self:SellItems(true)
@@ -266,7 +268,7 @@ end
 function JunkIt:OnInvokeVendorWindow(unitArg)
     -- If window is already initialized process actions
     if self.bWindowInitialized then
-        self:ProcessActions(unitArg)
+        self:ProcessActions(unitArg, self.vendorAddon.tWndRefs and self.vendorAddon.tWndRefs.wndVendor or self.vendorAddon.wndVendor)
     else
         -- Otherwise store the vendor unit for later use
         self.vendorUnitArg = unitArg
