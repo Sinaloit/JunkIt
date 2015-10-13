@@ -224,6 +224,12 @@ end
 
 -- Helper function to process actions once everything is setup
 function JunkIt:ProcessActions(unitArg, wndRef)
+  -- Nil out unitArg to prevent confusion later
+  self.vendorUnitArg = nil
+  -- Mark window as non initialized again
+  self.bWindowInitialized = false
+
+  -- Store reference to Unit in-case window is not initialized fully yet
   wndRef:SetData(unitArg)
 
   local nItemsSold = nil
@@ -257,11 +263,6 @@ function JunkIt:ProcessActions(unitArg, wndRef)
   end
 
   self:SendAlert(strAlertMsg)
-
-  -- Nil out unitArg to prevent confusion later
-  self.vendorUnitArg = nil
-  -- Mark window as non initialized again
-  self.bWindowInitialized = false
 end
 
 -- Event handler for Vendor window opening.
