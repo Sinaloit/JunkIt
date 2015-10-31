@@ -65,6 +65,7 @@ local ItemFamily = {
     QuestItem  = 24,
     Costume    = 26,
     Crafting   = 27,
+    Runes      = 33,
 }
 
 local ItemCategory = {
@@ -86,6 +87,7 @@ function JunkIt:new(o)
     o.config.keepSalvage  = false
     o.config.autoSell     = false
     o.config.sellHousing  = false
+    o.config.sellRunes    = false
     o.config.autoRepair   = false
     o.config.showButton   = false
     o.config.repairGuild  = false
@@ -342,7 +344,8 @@ function JunkIt:DebugSell(item)
         (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or
         (itemFamily == ItemFamily.Ornamental and self.config.sellShields) or
         (itemFamily == ItemFamily.Housing and self.config.sellHousing) or
-        (itemFamily == ItemFamily.Costume and self.config.sellCostumes)) then
+        (itemFamily == ItemFamily.Costume and self.config.sellCostumes) or
+        (itemFamily == ItemFamily.Runes and self.config.sellRunes)) then
         -- Is it under our threshold?
         if item:GetItemQuality() == Item.CodeEnumItemQuality.Inferior or self.config.minSellQuality > item:GetItemQuality() then
             Print(item:GetName() .. " will be auto-sold ["..itemFamily.." type set and meets qual (Type: ".. item:GetItemFamilyName() ..", Qual:" .. item:GetItemQuality()")]")
@@ -377,7 +380,8 @@ function JunkIt:IsSellable(item)
         (itemFamily == ItemFamily.Weapon and self.config.sellWeapons) or
         (itemFamily == ItemFamily.Ornamental and self.config.sellShields) or
         (itemFamily == ItemFamily.Housing and self.config.sellHousing) or
-        (itemFamily == ItemFamily.Costume and self.config.sellCostumes)) then
+        (itemFamily == ItemFamily.Costume and self.config.sellCostumes) or
+        (itemFamily == ItemFamily.Runes and self.config.sellRunes)) then
 
         -- Is it under our threshold?
         if item:GetItemQuality() == Item.CodeEnumItemQuality.Inferior or self.config.minSellQuality > item:GetItemQuality() then return true end
